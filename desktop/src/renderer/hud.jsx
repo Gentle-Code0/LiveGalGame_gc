@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './hud.css';
+import './icons.css';
 import audioCaptureService from "../asr/audio-capture-service.js";
 // Hooks
 import { useChatSession } from './hooks/useChatSession.js';

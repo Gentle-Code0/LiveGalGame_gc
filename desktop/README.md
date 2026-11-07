@@ -93,6 +93,84 @@ pnpm dev
 
 ## 💻 系统要求
 
+### Windows 开发、断点调试和构建
+
+用 VS Code 打开仓库根目录。前端 JavaScript/React 和 Electron 主进程调试使用 VS Code
+内置 JavaScript 调试器，无需额外 Electron 插件。调试 Python 时安装 Microsoft 的
+Python (`ms-python.python`) 和 Python Debugger (`ms-python.debugpy`)；Tailwind CSS
+IntelliSense (`bradlc.vscode-tailwindcss`) 可选。
+
+准备 Node.js 22 LTS、pnpm 9（与 CI 使用的 pnpm 主版本一致）、Python 3.10。
+若 better-sqlite3 原生模块需要本地编译，安装 Visual Studio Build Tools 的
+“使用 C++ 的桌面开发”工作负载及 Windows SDK；这不是 VS Code 扩展。
+
+在 PowerShell 中执行：
+
+```powershell
+cd D:\code\LiveGalGame_gc\desktop
+pnpm install --frozen-lockfile
+pnpm run prepare:python
+$env:ASR_PYTHON_PATH = "$PWD\python-env\Scripts\python.exe"
+pnpm dev
+```
+
+`prepare:python` 创建 Python 环境并安装语音依赖，首次运行需要联网且下载量较大。
+语音模型在应用的语音设置中下载，AI 建议需要在设置中配置相应服务。
+只查看界面时可先运行 `pnpm dev`，但没有 Python 环境、模型或服务配置时，
+不能据此判断语音和 AI 功能正常。不要只在浏览器里打开 Vite 地址试用，完整功能需要 Electron 的 IPC。
+
+修改 `src/renderer` 下的 React/CSS 后，Vite 会热更新，可边操作窗口边修改。
+按 `Ctrl+Shift+I` 打开 Electron 开发者工具，在 Elements 查看样式，在 Sources 设置前端断点。
+修改 `src/main.js`、`src/core` 或 `src/preload.js` 后，退出并重新启动 Electron。
+
+若要在 VS Code 中调试主进程，先停止 `pnpm dev`，在一个终端运行 `pnpm run dev:vite`，
+然后把以下配置加入仓库根目录的 `.vscode/launch.json`（该目录被 Git 忽略）：
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Desktop Electron 主进程",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/desktop",
+      "runtimeExecutable": "${workspaceFolder}/desktop/node_modules/electron/dist/electron.exe",
+      "args": ["."],
+      "env": {
+        "NODE_ENV": "development",
+        "PYTHONIOENCODING": "utf-8",
+        "ASR_PYTHON_PATH": "${workspaceFolder}/desktop/python-env/Scripts/python.exe"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
+```
+
+在主进程代码中设置断点，选择此配置后按 F5。前端断点仍在窗口开发者工具中设置。
+主进程调试器不会自动调试 Python 子进程；Python 需要独立使用 Python Debugger，
+并选择 `desktop/python-env/Scripts/python.exe` 解释器。
+
+构建 Windows 安装包（在 `desktop` 目录执行）：
+
+```powershell
+pnpm run build:win
+```
+
+此命令先用 PyInstaller 打包 Python 后端，再构建 Vite 前端，最后用 electron-builder
+生成 NSIS 安装程序，输出位于 `desktop/release/`。仅验证前端构建可运行
+`pnpm run build:vite`，它不会生成安装包。无需生成安装包的本地生产模式试用可运行
+`pnpm run start:client`，此模式仍使用本机开发依赖。
+
+图标字体已存放在 `src/renderer/assets/fonts`，开发及打包后均从本地加载。
+若再次看到 `dashboard`、`groups` 等字样，检查开发者工具 Network 中本地图标字体
+是否成功加载，并确认运行的是最新构建。中文和普通英文字体仍有系统字体回退。
+
+参考：[VS Code Node/Electron 调试](https://code.visualstudio.com/docs/nodejs/nodejs-debugging)、
+[Python 调试](https://code.visualstudio.com/docs/python/debugging)。
+
 - **Windows**: 10 / 11
 - **macOS**: 12.0+
 - 需要麦克风权限
