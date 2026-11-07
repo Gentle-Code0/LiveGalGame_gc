@@ -33,7 +33,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'src/renderer/index.html'),
-        hud: path.resolve(__dirname, 'src/renderer/hud.html'),
       },
       output: {
         entryFileNames: '[name].js',

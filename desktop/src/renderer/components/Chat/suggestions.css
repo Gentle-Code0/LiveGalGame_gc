@@ -1,0 +1,18 @@
+.conversation-suggestions { margin-top: 24px; color: inherit; }
+.conversation-suggestions .suggestion-header,
+.conversation-suggestions .suggestion-actions,
+.conversation-suggestions .suggestion-meta,
+.conversation-suggestions .suggestion-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.conversation-suggestions .suggestion-header { justify-content: space-between; }
+.conversation-suggestions .suggestions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+.conversation-suggestions .suggestion-card { position: relative; border: 1px solid #c5166240; border-radius: 16px; padding: 18px; background: #c5166208; cursor: pointer; }
+.conversation-suggestions .suggestion-card:hover { border-color: #c51662; }
+.conversation-suggestions .suggestion-body { white-space: pre-wrap; margin: 8px 0; }
+.conversation-suggestions .suggestion-badge { padding: 2px 8px; border-radius: 12px; background: #c5166218; font-size: 12px; }
+.conversation-suggestions .suggestion-action-btn,
+.conversation-suggestions .suggestion-select-btn { padding: 6px 12px; border-radius: 8px; background: #c51662; color: white; }
+.conversation-suggestions button:disabled { opacity: .5; cursor: wait; }
+.conversation-suggestions .suggestion-selected-indicator { color: #c51662; font-weight: bold; }
+.conversation-suggestions .suggestions-refresh-container { margin-top: 12px; text-align: center; }
+.conversation-suggestions .hud-status { padding: 16px; }
+.conversation-suggestions .hud-warning { color: #b45309; }

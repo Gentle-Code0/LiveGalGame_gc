@@ -161,15 +161,6 @@ export default class DatabaseBase {
     // 初始化示例数据（如果数据库为空）
     this.seedSampleData();
 
-    // 初始化默认 ASR 配置（如果没有）
-    this.seedDefaultASRConfig();
-
-    // 修复 ASR 配置（迁移旧的/错误的模型名称）
-    this.fixASRConfig();
-
-    // 初始化默认音频源（如果没有）
-    this.seedDefaultAudioSources();
-
     // 初始化默认对话建议配置
     if (typeof this.seedDefaultSuggestionConfig === 'function') {
       this.seedDefaultSuggestionConfig();

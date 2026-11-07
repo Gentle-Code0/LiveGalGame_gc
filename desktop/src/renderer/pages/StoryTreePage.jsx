@@ -12,9 +12,6 @@ export default function StoryTreePage() {
     const [visibleIndex, setVisibleIndex] = useState(0);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-    const [audioSource, setAudioSource] = useState(null);
-    const audioRef = useRef(null);
     const scrollContainerRef = useRef(null);
 
     // Constants for tree layout
@@ -120,72 +117,6 @@ export default function StoryTreePage() {
             }
         }
         setIsPlaying(!isPlaying);
-    };
-
-    const handlePlayAudio = async (filePath) => {
-        if (!filePath) return;
-
-        try {
-            // If clicking the same audio that's already playing, toggle it
-            if (audioSource && isAudioPlaying) {
-                audioRef.current.pause();
-                setIsAudioPlaying(false);
-                return;
-            }
-
-            const dataUrl = await window.electronAPI.asrGetAudioDataUrl(filePath);
-            if (dataUrl) {
-                setAudioSource(dataUrl);
-                setIsAudioPlaying(true);
-                // The actual play will be triggered by useEffect on audioSource change
-            }
-        } catch (error) {
-            console.error('Failed to play audio:', error);
-        }
-    };
-
-    useEffect(() => {
-        if (audioSource && audioRef.current) {
-            audioRef.current.play().catch(err => {
-                console.error('Audio play error:', err);
-                setIsAudioPlaying(false);
-            });
-        }
-    }, [audioSource]);
-
-    const handleDeleteAudio = async (node) => {
-        if (!node.audio_file_path || !node.audio_record_id) return;
-
-        const confirmed = window.confirm('确定要删除这段录音吗？物理文件将被移除且无法恢复。');
-        if (!confirmed) return;
-
-        try {
-            const result = await window.electronAPI.asrDeleteAudioFile({
-                recordId: node.audio_record_id,
-                filePath: node.audio_file_path
-            });
-
-            if (result.success) {
-                // Update local state to hide the button
-                // We need to find the node in the review.nodes array and update it
-                // Since review is from a hook, we might not be able to update it directly easily
-                // But StoryTreePage will re-render if we can trigger a refresh or local state update
-                // For now, let's just update the local nodes useMemo dependency if possible or use a local override state
-
-                // Simple approach: show a toast and disable the button locally for this session
-                node.audio_file_path = null;
-                if (audioSource) {
-                    audioRef.current.pause();
-                    setIsAudioPlaying(false);
-                }
-                alert('录音已删除');
-            } else {
-                alert('删除失败: ' + result.error);
-            }
-        } catch (error) {
-            console.error('Failed to delete audio:', error);
-            alert('删除过程中发生错误');
-        }
     };
 
     if (isLoading || !review) {
@@ -304,26 +235,7 @@ export default function StoryTreePage() {
                                         <div>
                                             <div className="flex items-center justify-between mb-1">
                                                 <div className="text-[10px] text-text-muted-light dark:text-text-muted-dark uppercase tracking-wider">用户行为</div>
-                                                {activeNode.audio_file_path && (
-                                                    <div className="flex items-center gap-1.5">
-                                                        <button
-                                                            onClick={() => handlePlayAudio(activeNode.audio_file_path)}
-                                                            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold transition-all ${isAudioPlaying ? 'bg-primary text-white scale-105 shadow-md shadow-primary/20' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
-                                                        >
-                                                            <span className="material-symbols-outlined text-sm">
-                                                                {isAudioPlaying ? 'pause' : 'play_circle'}
-                                                            </span>
-                                                            {isAudioPlaying ? '播放中' : '播放录音'}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteAudio(activeNode)}
-                                                            className="flex items-center justify-center w-6 h-6 rounded-full bg-error/10 text-error hover:bg-error/20 transition-all"
-                                                            title="删除录音文件"
-                                                        >
-                                                            <span className="material-symbols-outlined text-sm">delete</span>
-                                                        </button>
-                                                    </div>
-                                                )}
+
                                             </div>
                                             <p className="text-sm text-text-light dark:text-text-dark leading-relaxed">{activeNode.user_description}</p>
                                         </div>

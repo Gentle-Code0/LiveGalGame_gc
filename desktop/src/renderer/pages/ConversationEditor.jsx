@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ReviewSection from '../components/review/ReviewSection.jsx';
 
+import ConversationSuggestions from '../components/Chat/ConversationSuggestions.jsx';
+
 function ConversationEditor() {
   const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState([]);
@@ -260,6 +262,8 @@ function ConversationEditor() {
             conversationId={selectedConversation}
             onReviewGenerated={loadConversations}
           />
+
+          {selectedConversationData && <ConversationSuggestions key={selectedConversation} conversation={selectedConversationData} />}
 
           {selectedConversation ? (
             <div className="mt-6 max-w-5xl mx-auto">

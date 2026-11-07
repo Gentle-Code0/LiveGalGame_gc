@@ -4,43 +4,23 @@ import { Link } from 'react-router-dom';
 // Hooks
 import { useLLMConfig } from '../hooks/useLLMConfig.js';
 import { useSuggestionConfig } from '../hooks/useSuggestionConfig.js';
-import { useAudioDevices } from '../hooks/useAudioDevices.js';
-import { useAudioCapture } from '../hooks/useAudioCapture.js';
 
 // Components
 import { LLMConfigList } from '../components/LLM/LLMConfigList.jsx';
 import { LLMConfigForm } from '../components/LLM/LLMConfigForm.jsx';
 import { SuggestionConfigForm } from '../components/Suggestions/SuggestionConfigForm.jsx';
-import { AudioDeviceSelector } from '../components/Audio/AudioDeviceSelector.jsx';
-import { AudioTester } from '../components/Audio/AudioTester.jsx';
 
 function Settings() {
   // 使用自定义Hooks
   const llmHook = useLLMConfig();
   const suggestionHook = useSuggestionConfig();
-  const audioDevicesHook = useAudioDevices();
-  const audioCaptureHook = useAudioCapture();
 
   // 初始化
   useEffect(() => {
     llmHook.loadConfigs();
     llmHook.loadFeatureBindings();
     suggestionHook.loadSuggestionSettings();
-    audioDevicesHook.initializeAudioDevices();
   }, []);
-
-  // 当音频源配置加载完成后，更新设备选择并自动保存
-  useEffect(() => {
-    audioDevicesHook.handleAudioSourcesLoaded();
-  }, [audioDevicesHook.speaker1Source, audioDevicesHook.speaker2Source, audioDevicesHook.audioDevices]);
-
-  // 开始监听
-  const handleStartListening = async () => {
-    await audioCaptureHook.startListening({
-      selectedAudioDevice: audioDevicesHook.selectedAudioDevice,
-      captureSystemAudio: audioDevicesHook.captureSystemAudio
-    });
-  };
 
   return (
     <div className="p-8">
@@ -193,55 +173,6 @@ function Settings() {
           )}
         </div>
 
-        {/* 音频设置 */}
-        <div className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark mb-6">
-          <h2 className="text-xl font-semibold text-text-light dark:text-text-dark mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">mic</span>
-            音频输入设置
-          </h2>
-
-          <AudioDeviceSelector
-            audioDevices={audioDevicesHook.audioDevices}
-            selectedAudioDevice={audioDevicesHook.selectedAudioDevice}
-            onDeviceChange={audioDevicesHook.handleAudioDeviceChange}
-            captureSystemAudio={audioDevicesHook.captureSystemAudio}
-            onSystemAudioToggle={audioDevicesHook.handleSystemAudioToggle}
-            speaker1Source={audioDevicesHook.speaker1Source}
-            speaker2Source={audioDevicesHook.speaker2Source}
-          />
-
-          <AudioTester
-            isListening={audioCaptureHook.isListening}
-            audioStatus={audioCaptureHook.audioStatus}
-            desktopCapturerError={audioCaptureHook.desktopCapturerError}
-            micVolumeLevel={audioCaptureHook.micVolumeLevel}
-            systemVolumeLevel={audioCaptureHook.systemVolumeLevel}
-            totalVolumeLevel={audioCaptureHook.totalVolumeLevel}
-            onStart={handleStartListening}
-            onStop={audioCaptureHook.stopListening}
-            captureSystemAudio={audioDevicesHook.captureSystemAudio}
-          />
-        </div>
-
-        {/* ASR设置 */}
-        <div className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-text-light dark:text-text-dark flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">mic</span>
-              语音识别设置
-            </h2>
-            <Link
-              to="/asr-settings"
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-sm">settings</span>
-              管理ASR配置
-            </Link>
-          </div>
-          <p className="text-text-muted-light dark:text-text-muted-dark">
-            配置语音识别模型、音频设备和录音选项
-          </p>
-        </div>
 
       </div>
     </div>

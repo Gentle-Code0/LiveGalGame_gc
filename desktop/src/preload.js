@@ -95,10 +95,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 平台信息
   platform: process.platform,
 
-  // electron-audio-loopback API（用于系统音频捕获）
-  enableLoopbackAudio: () => ipcRenderer.invoke('enable-loopback-audio'),
-  disableLoopbackAudio: () => ipcRenderer.invoke('disable-loopback-audio'),
-
   // IPC通信
   send: (channel, data) => ipcRenderer.send(channel, data),
   on: (channel, callback) => registerWrappedListener(channel, callback, { once: false }),
@@ -107,16 +103,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // 日志
   log: (message) => ipcRenderer.send('log', message),
-
-  // HUD控制
-  showHUD: () => ipcRenderer.send('show-hud'),
-  hideHUD: () => ipcRenderer.send('hide-hud'),
-  closeHUD: () => ipcRenderer.send('close-hud'),
-
-  // HUD拖拽
-  startHUDDrag: (pos) => ipcRenderer.send('start-hud-drag', pos),
-  updateHUDDrag: (pos) => ipcRenderer.send('update-hud-drag', pos),
-  endHUDDrag: () => ipcRenderer.send('end-hud-drag'),
 
   // 主窗口控制
   minimizeWindow: () => ipcRenderer.send('minimize-window'),
@@ -216,72 +202,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getSuggestionConfig: () => ipcRenderer.invoke('suggestion-get-config'),
   updateSuggestionConfig: (updates) => ipcRenderer.invoke('suggestion-update-config', updates),
 
-  // ASR（语音识别）API
-  asrInitialize: (conversationId) => ipcRenderer.invoke('asr-initialize', conversationId),
-  asrCheckReady: () => ipcRenderer.invoke('asr-check-ready'),
-  asrStart: (conversationId) => ipcRenderer.invoke('asr-start', conversationId),
-  asrStop: () => ipcRenderer.invoke('asr-stop'),
-  asrGetModelPresets: () => ipcRenderer.invoke('asr-get-model-presets'),
-  asrGetModelStatus: (modelId) => ipcRenderer.invoke('asr-get-model-status', modelId),
-  asrGetAllModelStatuses: () => ipcRenderer.invoke('asr-get-all-model-statuses'),
-  // 下载 ASR 模型，允许指定下载源（huggingface / modelscope）
-  asrDownloadModel: (modelId, source) => ipcRenderer.invoke('asr-download-model', modelId, source),
-  asrCancelModelDownload: (modelId) => ipcRenderer.invoke('asr-cancel-model-download', modelId),
-  asrGetConfigs: () => ipcRenderer.invoke('asr-get-configs'),
-  asrCreateConfig: (configData) => ipcRenderer.invoke('asr-create-config', configData),
-  asrUpdateConfig: (id, updates) => ipcRenderer.invoke('asr-update-config', id, updates),
-  asrSetDefaultConfig: (id) => ipcRenderer.invoke('asr-set-default-config', id),
-  asrGetAudioSources: () => ipcRenderer.invoke('asr-get-audio-sources'),
-  asrCreateAudioSource: (sourceData) => ipcRenderer.invoke('asr-create-audio-source', sourceData),
-  asrUpdateAudioSource: (id, updates) => ipcRenderer.invoke('asr-update-audio-source', id, updates),
-  asrGetSpeechRecords: (conversationId) => ipcRenderer.invoke('asr-get-speech-records', conversationId),
-  asrConvertToMessage: (recordId, conversationId) => ipcRenderer.invoke('asr-convert-to-message', recordId, conversationId),
-  asrCleanupAudioFiles: (retentionDays) => ipcRenderer.invoke('asr-cleanup-audio-files', retentionDays),
-  asrGetAudioDataUrl: (filePath) => ipcRenderer.invoke('asr-get-audio-data-url', filePath),
-  asrDeleteAudioFile: (payload) => ipcRenderer.invoke('asr-delete-audio-file', payload),
-  asrReloadModel: () => ipcRenderer.invoke('asr-reload-model'),
-  // 模型缓存目录（HF / ModelScope）配置
-  appGetModelCachePaths: () => ipcRenderer.invoke('app-get-model-cache-paths'),
-  appSelectDirectory: (options) => ipcRenderer.invoke('app-select-directory', options),
-  appSetAsrCacheBase: (cacheBase) => ipcRenderer.invoke('app-set-asr-cache-base', cacheBase),
-  onAsrModelDownloadStarted: (callback) => {
-    const listener = (event, payload) => callback(payload);
-    ipcRenderer.on('asr-model-download-started', listener);
-    return () => ipcRenderer.removeListener('asr-model-download-started', listener);
-  },
-  onAsrModelDownloadLog: (callback) => {
-    const listener = (event, payload) => callback(payload);
-    ipcRenderer.on('asr-model-download-log', listener);
-    return () => ipcRenderer.removeListener('asr-model-download-log', listener);
-  },
-  onAsrModelDownloadProgress: (callback) => {
-    const listener = (event, payload) => callback(payload);
-    ipcRenderer.on('asr-model-download-progress', listener);
-    return () => ipcRenderer.removeListener('asr-model-download-progress', listener);
-  },
-  onAsrModelDownloadComplete: (callback) => {
-    const listener = (event, payload) => callback(payload);
-    ipcRenderer.on('asr-model-download-complete', listener);
-    return () => ipcRenderer.removeListener('asr-model-download-complete', listener);
-  },
-  onAsrModelDownloadError: (callback) => {
-    const listener = (event, payload) => callback(payload);
-    ipcRenderer.on('asr-model-download-error', listener);
-    return () => ipcRenderer.removeListener('asr-model-download-error', listener);
-  },
-  onAsrModelDownloadCancelled: (callback) => {
-    const listener = (event, payload) => callback(payload);
-    ipcRenderer.on('asr-model-download-cancelled', listener);
-    return () => ipcRenderer.removeListener('asr-model-download-cancelled', listener);
-  },
 
-  // Desktop Capturer API (用于系统音频捕获)
-  getDesktopSources: (options) => ipcRenderer.invoke('get-desktop-sources', options),
-
-  // 媒体权限 API (主要用于 macOS)
-  checkMediaAccessStatus: (mediaType) => ipcRenderer.invoke('check-media-access-status', mediaType),
-  requestMediaAccess: (mediaType) => ipcRenderer.invoke('request-media-access', mediaType),
-  checkScreenCaptureAccess: () => ipcRenderer.invoke('check-screen-capture-access')
 });
 
 // 监听主进程消息

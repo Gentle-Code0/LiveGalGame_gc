@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Overview() {
+  const navigate = useNavigate();
   const [statistics, setStatistics] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,14 +59,7 @@ function Overview() {
     }
   };
 
-  const handleShowHUD = () => {
-    if (window.electronAPI?.showHUD) {
-      window.electronAPI.showHUD();
-    } else {
-      console.error('electronAPI.showHUD not available');
-      alert('electronAPI.showHUD 不可用');
-    }
-  };
+  const handleShowHUD = () => navigate('/conversations');
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

@@ -196,7 +196,6 @@ export default class ReviewService {
         reviewData.summary.custom_count = reviewData.nodes.filter((n) => n.choice_type === 'custom' || n.choice_type === 'insight').length;
 
         this.enrichGhostOptions(reviewData, nodes);
-        this.enrichAudioInfo(reviewData, conversationId);
 
         // 6. 校验/兜底
         report('validate', 0.86, '校验并兜底复盘结构...');
@@ -1032,40 +1031,4 @@ export default class ReviewService {
         });
     }
 
-    enrichAudioInfo(reviewData, conversationId) {
-        if (!reviewData.nodes || reviewData.nodes.length === 0) return;
-
-        // 获取该对话的所有录音记录，按时间排序
-        const records = this.db.getSpeechRecordsByConversation(conversationId);
-        if (!records || records.length === 0) return;
-
-        reviewData.nodes.forEach(node => {
-            if (!node.timestamp) return;
-
-            // 寻找离该节点 timestamp 最近的一个录音记录 (时间差最小)
-            // 且录音记录通常在节点之前或附近（例如用户说话后产生的节点）
-            let closest = null;
-            let minDiff = Infinity;
-
-            for (const record of records) {
-                // 录音记录的 start_time 或 end_time 与节点 timestamp 的关系
-                // 建议使用 end_time，因为识别完成时刻更接近节点触发时刻
-                const refTime = record.end_time || record.start_time;
-                const diff = Math.abs(refTime - node.timestamp);
-
-                // 只有当录音记录有文件路径时才考虑
-                if (record.audio_file_path && diff < minDiff) {
-                    minDiff = diff;
-                    closest = record;
-                }
-            }
-
-            // 如果找到且时间差距在合理范围内（例如 30秒内），则关联
-            if (closest && minDiff < 30000) {
-                node.audio_record_id = closest.id;
-                node.audio_file_path = closest.audio_file_path;
-                node.audio_duration = closest.audio_duration;
-            }
-        });
-    }
 }
