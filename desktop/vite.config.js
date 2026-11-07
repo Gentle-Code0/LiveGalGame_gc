@@ -24,8 +24,8 @@ const devPerfPlugin = () => {
 
 export default defineConfig({
   plugins: [react(), devPerfPlugin()],
-  base: './',
-  // 指定根目录为 src/renderer，这样 Vite 就能找到 index.html 和 hud.html
+  base: '/',
+  // The existing renderer is now the sole browser entry point.
   root: path.resolve(__dirname, 'src/renderer'),
   build: {
     outDir: path.resolve(__dirname, 'dist/renderer'),
@@ -43,6 +43,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    proxy: { '/api': 'http://127.0.0.1:7456' },
     strictPort: true
   },
   resolve: {

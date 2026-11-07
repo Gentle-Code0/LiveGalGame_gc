@@ -1,7 +1,6 @@
 
-import { ipcMain } from 'electron';
 
-export function registerReviewHandlers({ reviewService }) {
+export function registerReviewHandlers({ ipcMain, reviewService }) {
     if (!reviewService) {
         console.error('[IPC] ReviewService is required for review handlers');
         return;

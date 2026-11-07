@@ -1,11 +1,10 @@
-import { ipcMain } from 'electron';
 
 /**
  * 注册数据库相关 IPC 处理器
  * @param {object} deps
  * @param {object} deps.db
  */
-export function registerDatabaseHandlers({ db }) {
+export function registerDatabaseHandlers({ ipcMain, db }) {
   ipcMain.handle('db-get-all-characters', () => {
     try {
       return db.getAllCharacters();

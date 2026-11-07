@@ -219,8 +219,8 @@ export default function LLMConfigManager(BaseClass) {
           clientConfig.baseURL = normalizedBaseURL;
         }
 
-        const client = new OpenAI(clientConfig);
-        timeoutMs = this.normalizeTimeoutMs(configData.timeout_ms, null);
+        const client = new OpenAI({ ...clientConfig, timeout: 30000, maxRetries: 0 });
+        timeoutMs = Math.min(this.normalizeTimeoutMs(configData.timeout_ms, 30000), 60000);
         requestParams = {
           model: configData.model_name || 'gpt-4o-mini',
           messages: [{ role: 'user', content: 'test' }],
@@ -228,16 +228,7 @@ export default function LLMConfigManager(BaseClass) {
           temperature: 0
         };
 
-        console.log('LLM Connection Test Debug Info:', {
-          configData: {
-            name: configData.name,
-            base_url: configData.base_url,
-            model_name: configData.model_name,
-            timeout_ms: timeoutMs
-          },
-          requestParams,
-          clientConfig
-        });
+
 
         const controller = timeoutMs ? new AbortController() : null;
         const timer = controller
@@ -276,7 +267,8 @@ export default function LLMConfigManager(BaseClass) {
             timeout_ms: timeoutMs
           },
           requestParams: requestParams || null,
-          clientConfig: clientConfig || null
+          // Never log clientConfig: it contains the user's API key.
+          model: configData.model_name
         });
 
         let errorMessage = '连接失败';

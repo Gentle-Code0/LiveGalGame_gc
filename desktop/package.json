@@ -1,92 +1,43 @@
 {
-  "name": "livegalgame-desktop",
+  "name": "livegalgame-web",
   "version": "0.1.0",
-  "description": "LiveGalGame Desktop - 实时对话辅助与学习工具",
+  "description": "LiveGalGame Web - 对话管理、AI建议与复盘",
   "type": "module",
-  "main": "src/main.js",
   "scripts": {
-    "predev": "node scripts/ensure-port-free.js",
-    "dev": "chcp 65001 > nul && pnpm run predev && concurrently -k \"vite\" \"npm run dev:electron\"",
-    "dev:log": "node scripts/dev-log.js",
-    "dev:electron": "cross-env NODE_ENV=development PYTHONIOENCODING=utf-8 electron . --enable-logging",
-    "dev:vite": "vite",
-    "rebuild:better-sqlite3": "electron-rebuild -f -w better-sqlite3",
-    "postinstall": "pnpm run rebuild:better-sqlite3",
-    "build": "vite build && electron-builder",
+    "dev": "vite --host 0.0.0.0",
+    "dev:server": "node src/server/index.js",
+    "build": "vite build",
     "build:vite": "vite build",
-    "build:win": "vite build && electron-builder --win",
-    "build:mac": "vite build && electron-builder --mac",
-    "preview": "vite preview",
-    "start:prod": "vite build && cross-env NODE_ENV=production electron .",
-    "start:client": "vite build && cross-env NODE_ENV=production electron ."
+    "start": "node src/server/index.js",
+    "test": "node --test test/*.test.js"
   },
   "keywords": [
-    "electron",
+    "web",
     "conversation",
-    "ai-assistant",
-    "desktop"
+    "ai-assistant"
   ],
   "author": "LiveGalGame Team",
   "license": "MIT",
   "devDependencies": {
-    "@electron/rebuild": "^4.0.1",
     "@playwright/test": "^1.57.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.22",
-    "concurrently": "^9.1.0",
-    "cross-env": "^10.1.0",
-    "electron": "^35.7.5",
-    "electron-builder": "^25.1.8",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18",
-    "vite": "^6.0.5",
-    "wait-on": "^8.0.1"
+    "vite": "^6.0.5"
   },
   "dependencies": {
     "@toon-format/toon": "^2.0.1",
     "better-sqlite3": "^12.4.1",
-    "electron-store": "^8.2.0",
     "openai": "^6.9.0",
-    "kill-port": "^2.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"
   },
-  "build": {
-    "appId": "com.livegalgame.desktop",
-    "productName": "LiveGalGame Desktop",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/renderer/**/*",
-      "data/**/*",
-      "src/main.js",
-      "src/preload.js",
-      "src/core/**/*",
-      "src/shared/**/*",
-      "src/utils/**/*",
-      "src/db/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "data",
-        "to": "data"
-      }
-    ],
-    "mac": {
-      "category": "public.app-category.productivity",
-      "target": "dmg"
-    },
-    "win": {
-      "target": "nsis"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    }
-  }
+  "engines": {
+    "node": ">=22.14.0 <23"
+  },
+  "packageManager": "pnpm@9.15.9"
 }

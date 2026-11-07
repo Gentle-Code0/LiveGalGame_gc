@@ -1,4 +1,3 @@
-import { ipcMain } from 'electron';
 
 /**
  * 注册 LLM 建议相关 IPC 处理器
@@ -7,7 +6,7 @@ import { ipcMain } from 'electron';
  * @param {object} deps.llmSuggestionService
  * @param {Function} deps.ensureSuggestionService
  */
-export function registerSuggestionHandlers({ db, llmSuggestionService, ensureSuggestionService }) {
+export function registerSuggestionHandlers({ ipcMain, db, llmSuggestionService, ensureSuggestionService }) {
   ipcMain.handle('suggestion-get-config', () => {
     try {
       return db.getSuggestionConfig();

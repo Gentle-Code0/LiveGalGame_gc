@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import ReviewSection from '../components/review/ReviewSection.jsx';
 
 import ConversationSuggestions from '../components/Chat/ConversationSuggestions.jsx';
+import NewConversationDialog from '../components/Chat/NewConversationDialog.jsx';
 
 function ConversationEditor() {
   const [searchParams] = useSearchParams();
@@ -11,6 +12,7 @@ function ConversationEditor() {
   const [messages, setMessages] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showNewConversation, setShowNewConversation] = useState(searchParams.get('new') === '1');
 
   // Resize logic
   const [sidebarWidth, setSidebarWidth] = useState(224);
@@ -169,6 +171,8 @@ function ConversationEditor() {
               </span>
             </div>
 
+            <button onClick={() => setShowNewConversation(true)} className="bg-primary text-white rounded-lg px-4 py-2">新建对话</button>
+
             <div className="flex-1 min-h-0 overflow-y-auto mt-2 space-y-1 pr-1">
               {loading ? (
                 <div className="text-center py-8">
@@ -313,6 +317,14 @@ function ConversationEditor() {
           )}
         </div>
       </main>
+      {showNewConversation && <NewConversationDialog
+        onClose={() => setShowNewConversation(false)}
+        onCreated={async conversation => {
+          setShowNewConversation(false);
+          await loadConversations();
+          await selectConversation(conversation.id);
+        }}
+      />}
     </div>
   );
 }

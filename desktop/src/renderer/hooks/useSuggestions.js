@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { copyText } from '../utils/copyText.js';
 
 const DEFAULT_SUGGESTION_CONFIG = {
   enable_passive_suggestion: 1,
@@ -251,13 +252,14 @@ export const useSuggestions = (sessionInfo) => {
    */
   const handleCopySuggestion = useCallback(async (id, content) => {
     try {
-      await navigator.clipboard.writeText(content);
+      await copyText(content);
       setCopiedSuggestionId(id);
       setTimeout(() => {
         setCopiedSuggestionId((prev) => (prev === id ? null : prev));
       }, 1500);
     } catch (err) {
       console.error('复制建议失败：', err);
+      setSuggestionError(err.message);
     }
   }, []);
 

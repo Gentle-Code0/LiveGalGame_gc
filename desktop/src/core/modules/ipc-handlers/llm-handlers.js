@@ -1,11 +1,10 @@
-import { ipcMain } from 'electron';
 
 /**
  * 注册 LLM 配置相关 IPC 处理器
  * @param {object} deps
  * @param {object} deps.db
  */
-export function registerLLMHandlers({ db }) {
+export function registerLLMHandlers({ ipcMain, db }) {
   ipcMain.handle('llm-save-config', (event, configData) => {
     try {
       return db.saveLLMConfig(configData);

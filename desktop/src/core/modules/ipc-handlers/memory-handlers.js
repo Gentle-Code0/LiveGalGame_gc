@@ -1,10 +1,9 @@
-import { ipcMain } from 'electron';
 
 /**
  * 注册 Memory Service 相关 IPC 处理器
  * 仅依赖结构化过滤，无向量召回。
  */
-export function registerMemoryHandlers({ memoryService }) {
+export function registerMemoryHandlers({ ipcMain, memoryService }) {
   if (!memoryService) {
     console.warn('[MemoryHandlers] memoryService not provided, skip registration');
     return;

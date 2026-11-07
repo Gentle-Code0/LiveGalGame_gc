@@ -1,83 +1,17 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
-import { app } from 'electron';
+
 import { fileURLToPath } from 'url';
 
 // 获取 __dirname 的 ESM 等效方式
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-function isDirWritable(dirPath) {
-  try {
-    fs.mkdirSync(dirPath, { recursive: true });
-    fs.accessSync(dirPath, fs.constants.W_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export default class DatabaseBase {
   constructor(options = {}) {
-    // 数据库文件路径优先级：
-    // 1) 显式传入 options.dbPath
-    // 2) 环境变量 LIVEGALGAME_DB_PATH
-    // 3) Electron userData 目录下的 livegalgame.db（可写）
-    // 4) 回落到仓库内 data 目录（开发模式）
-    const customPath = options.dbPath || process.env.LIVEGALGAME_DB_PATH;
-    const isPackaged = app?.isPackaged;
-    const repoDefaultPath = path.join(__dirname, '../../data/livegalgame.db');
-    const userDataDir = app?.getPath ? app.getPath('userData') : null;
-    const userDbPath = userDataDir ? path.join(userDataDir, 'livegalgame.db') : null;
-
-    // 备选路径按照可写优先级排序
-    const candidates = [
-      customPath ? path.resolve(customPath) : null,
-      userDbPath,
-      repoDefaultPath,
-    ].filter(Boolean);
-
-    let resolvedPath = candidates.find((p) => isDirWritable(path.dirname(p)));
-    if (!resolvedPath) {
-      // 最后兜底：临时目录
-      const tmpPath = path.join(app?.getPath?.('temp') || '/tmp', 'livegalgame.db');
-      if (isDirWritable(path.dirname(tmpPath))) {
-        resolvedPath = tmpPath;
-        console.warn('[DB] All preferred locations not writable, falling back to temp DB:', resolvedPath);
-      } else {
-        throw new Error('No writable location found for database file');
-      }
-    }
-
-    // 如目标是用户目录且不存在，优先尝试从打包资源或仓库模板拷贝
-    try {
-      if (resolvedPath === userDbPath && !fs.existsSync(resolvedPath)) {
-        // 打包场景：resources/data/livegalgame.db 或 app.asar/data/livegalgame.db
-        const resourceSeed = process.resourcesPath
-          ? path.join(process.resourcesPath, 'data', 'livegalgame.db')
-          : null;
-        const asarSeed = path.join(app.getAppPath(), 'data', 'livegalgame.db');
-        const seedDb = (resourceSeed && fs.existsSync(resourceSeed))
-          ? resourceSeed
-          : fs.existsSync(asarSeed)
-            ? asarSeed
-            : null;
-
-        const fallbackSeed = fs.existsSync(repoDefaultPath) ? repoDefaultPath : null;
-        const source = seedDb || fallbackSeed;
-
-        if (source) {
-          fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
-          fs.copyFileSync(source, resolvedPath);
-          console.log(`[DB] seeded database to ${resolvedPath} from ${seedDb ? 'package' : 'repo'}`);
-        }
-      }
-    } catch (copyErr) {
-      console.error('[DB] Failed to bootstrap userData database:', copyErr);
-    }
-
-    this.dbPath = resolvedPath;
+    // The server owns one persistent database. Never silently fall back to a temporary file.
+    this.dbPath = path.resolve(options.dbPath || process.env.LIVEGALGAME_DB_PATH || path.join(__dirname, '../../../data/livegalgame.db'));
 
     // 确保数据库目录存在
     const dataDir = path.dirname(this.dbPath);
@@ -86,13 +20,7 @@ export default class DatabaseBase {
     }
 
     // 创建数据库连接
-    this.db = new Database(this.dbPath, {
-      // 过滤掉注释和空行，减少乱码可能性并保持日志整洁
-      verbose: (sql) => {
-        if (sql.trim().startsWith('--')) return;
-        console.log(sql);
-      } 
-    });
+    this.db = new Database(this.dbPath);
 
     // 启用 WAL 模式以提高性能和并发
     this.db.pragma('journal_mode = WAL');

@@ -1,117 +1,17 @@
-const { contextBridge, ipcRenderer } = require('electron');
+import { transport as ipcRenderer, subscribe, unsubscribe } from './transport.js';
 
-// Preload 脚本中使用简单的 console 日志
-// 注意：在 Electron 的 preload 环境中，某些 Node.js 模块可能不可用
-// 因此直接使用 console 而不是加载自定义 logger
-const logger = {
-  log: console.log.bind(console),
-  error: console.error.bind(console),
-  warn: console.warn.bind(console),
-  info: console.info.bind(console),
-  debug: console.debug.bind(console)
-};
-
-// 由于我们在 `on/once` 中会包一层 listener 来去掉 event 参数，
-// 这里维护一个映射，确保 `removeListener` 可以正确移除（避免监听器泄漏/重复触发）
-const listenerRegistry = new Map(); // channel -> Map(originalCallback -> wrappedCallback)
-
-function getChannelRegistry(channel) {
-  if (!listenerRegistry.has(channel)) {
-    listenerRegistry.set(channel, new Map());
-  }
-  return listenerRegistry.get(channel);
-}
-
-function registerWrappedListener(channel, callback, { once = false } = {}) {
-  if (typeof channel !== 'string' || typeof callback !== 'function') {
-    return () => { };
-  }
-
-  const channelMap = getChannelRegistry(channel);
-  const existing = channelMap.get(callback);
-  if (existing) {
-    try {
-      ipcRenderer.removeListener(channel, existing);
-    } catch {
-      // ignore
-    }
-  }
-
-  const wrapped = (event, ...args) => {
-    try {
-      callback(...args);
-    } finally {
-      // once 的 listener 触发后会自动移除，但我们也要清理映射
-      if (once) {
-        channelMap.delete(callback);
-      }
-    }
-  };
-
-  channelMap.set(callback, wrapped);
-  if (once) {
-    ipcRenderer.once(channel, wrapped);
-  } else {
-    ipcRenderer.on(channel, wrapped);
-  }
-
-  return () => {
-    try {
-      const stored = channelMap.get(callback);
-      if (!stored) return;
-      ipcRenderer.removeListener(channel, stored);
-      channelMap.delete(callback);
-    } catch {
-      // ignore
-    }
-  };
-}
-
-function removeWrappedListener(channel, callback) {
-  if (typeof channel !== 'string' || typeof callback !== 'function') {
-    return;
-  }
-  const channelMap = listenerRegistry.get(channel);
-  const stored = channelMap?.get(callback);
-  if (stored) {
-    try {
-      ipcRenderer.removeListener(channel, stored);
-    } catch {
-      // ignore
-    }
-    channelMap.delete(callback);
-    return;
-  }
-  // 兼容：如果外部传入的就是原生 listener
-  try {
-    ipcRenderer.removeListener(channel, callback);
-  } catch {
-    // ignore
-  }
-}
-
-// 暴露安全的API给渲染进程
-contextBridge.exposeInMainWorld('electronAPI', {
+// Compatibility name for the existing UI; no Electron runtime is used.
+window.electronAPI = {
   // 平台信息
-  platform: process.platform,
+  platform: 'web',
 
   // IPC通信
   send: (channel, data) => ipcRenderer.send(channel, data),
-  on: (channel, callback) => registerWrappedListener(channel, callback, { once: false }),
-  once: (channel, callback) => registerWrappedListener(channel, callback, { once: true }),
-  removeListener: (channel, callback) => removeWrappedListener(channel, callback),
+  on: (channel, callback) => subscribe(channel, callback),
+  once: (channel, callback) => subscribe(channel, callback, true),
+  removeListener: (channel, callback) => unsubscribe(channel, callback),
 
   // 日志
-  log: (message) => ipcRenderer.send('log', message),
-
-  // 主窗口控制
-  minimizeWindow: () => ipcRenderer.send('minimize-window'),
-  closeWindow: () => ipcRenderer.send('close-window'),
-
-  // 窗口拖拽
-  startDrag: (pos) => ipcRenderer.send('start-drag', pos),
-  updateDrag: (pos) => ipcRenderer.send('update-drag', pos),
-  endDrag: () => ipcRenderer.send('end-drag'),
 
   // 数据库API
   getAllCharacters: () => ipcRenderer.invoke('db-get-all-characters'),
@@ -141,7 +41,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateConversationReview: (conversationId, options = {}) =>
     ipcRenderer.invoke('review:generate', { conversationId, ...options }),
   onReviewProgress: (callback) => {
-    const listener = (event, data) => callback(data);
+    const listener = (data) => callback(data);
     ipcRenderer.on('review:progress', listener);
     return () => ipcRenderer.removeListener('review:progress', listener);
   },
@@ -168,32 +68,32 @@ contextBridge.exposeInMainWorld('electronAPI', {
   memoryQueryProfiles: (payload) => ipcRenderer.invoke('memory-query-profiles', payload),
   memoryQueryEvents: (payload) => ipcRenderer.invoke('memory-query-events', payload),
   onSuggestionStreamStart: (callback) => {
-    const listener = (event, data) => callback(data);
+    const listener = (data) => callback(data);
     ipcRenderer.on('llm-suggestion-stream-start', listener);
     return () => ipcRenderer.removeListener('llm-suggestion-stream-start', listener);
   },
   onSuggestionStreamHeader: (callback) => {
-    const listener = (event, data) => callback(data);
+    const listener = (data) => callback(data);
     ipcRenderer.on('llm-suggestion-stream-header', listener);
     return () => ipcRenderer.removeListener('llm-suggestion-stream-header', listener);
   },
   onSuggestionStreamChunk: (callback) => {
-    const listener = (event, data) => callback(data);
+    const listener = (data) => callback(data);
     ipcRenderer.on('llm-suggestion-stream-chunk', listener);
     return () => ipcRenderer.removeListener('llm-suggestion-stream-chunk', listener);
   },
   onSuggestionStreamPartial: (callback) => {
-    const listener = (event, data) => callback(data);
+    const listener = (data) => callback(data);
     ipcRenderer.on('llm-suggestion-stream-partial', listener);
     return () => ipcRenderer.removeListener('llm-suggestion-stream-partial', listener);
   },
   onSuggestionStreamEnd: (callback) => {
-    const listener = (event, data) => callback(data);
+    const listener = (data) => callback(data);
     ipcRenderer.on('llm-suggestion-stream-end', listener);
     return () => ipcRenderer.removeListener('llm-suggestion-stream-end', listener);
   },
   onSuggestionStreamError: (callback) => {
-    const listener = (event, data) => callback(data);
+    const listener = (data) => callback(data);
     ipcRenderer.on('llm-suggestion-stream-error', listener);
     return () => ipcRenderer.removeListener('llm-suggestion-stream-error', listener);
   },
@@ -203,15 +103,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateSuggestionConfig: (updates) => ipcRenderer.invoke('suggestion-update-config', updates),
 
 
-});
-
-// 监听主进程消息
-ipcRenderer.on('window-focused', () => {
-  logger.log('Window focused');
-});
-
-console.log('[Preload] Preload script loaded successfully, exposing APIs:', {
-  hasStartSuggestionStream: !!window.electronAPI?.startSuggestionStream,
-  hasSuggestionStreamEvents: !!window.electronAPI?.onSuggestionStreamStart
-});
-logger.log('Preload script loaded successfully');
+};

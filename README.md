@@ -1,149 +1,17 @@
-# LiveGalGame
+# LiveGalGame Web
 
-<p align="center">
-  <strong>修复了现实世界里和异性对话没有选择项的 Bug</strong>
-</p>
+本分支提供局域网网页上的对话辅助与复盘工具，保留角色管理、对话历史、AI 回复建议、建议选择、画像和剧情复盘。
 
-<p align="center">
-  <a href="https://github.com/JStone2934/LiveGalGame/tags">下载</a> •
-  <a href="#移动端">移动端</a> •
-  <a href="#桌面端">桌面端</a> •
-  <a href="https://www.bilibili.com/video/BV15Q1jBQEzq">B站演示</a>
-</p>
+已删除语音识别、音频采集、录音回放、桌面悬浮窗和 Android 应用。没有新增手动消息输入，尚未接入 QQ/微信；可使用原有记录和初始示例数据。
 
----
+## 部署
 
-## 这是什么？
+安装并启动支持 Linux 容器的 Docker，在仓库根目录执行：
 
-有 GalGame 玩家反映：和女生说话时不会弹出字幕与对话框，更没有选择项告诉你该说什么。
+```sh
+docker compose up -d --build
+```
 
-**LiveGalGame 就是为了解决这个问题而生的。**
+访问 http://localhost:7456 或 `http://部署机器局域网IP:7456`。数据通过命名卷持久化；最终运行环境不需要 Python、Electron 或安装程序。
 
-我们把 GalGame 的体验带到了现实世界——实时字幕、对话选项、好感度系统，让你的每一次对话都像在玩恋爱游戏。
-
-<img width="100%" alt="preview" src="https://github.com/user-attachments/assets/d6c44e31-8362-4825-9d7c-a760a4720133" />
-
-<img width="100%" alt="recent preview" src="./docs/20251225-004407.gif" />
-
-**QQ 群：1074602400**
-
-欢迎自由开发，提交 Issue 和 Pull Request 都非常欢迎。
-
----
-
-## 核心功能
-
-### 实时字幕
-对话内容实时转文字显示，再也不用担心听不清或忘记对方说了什么。
-
-### AI 对话建议
-在关键时刻给出多个回复选项，每个选项都带有：
-- **情感标签**：温柔、幽默、直接...
-- **好感度预测**：告诉你这样说会产生什么效果
-
-### 好感度系统
-可视化的好感度进度条，让你实时看到对话效果：
-> "好感度: 50 → 70 (+20 ↑)"
-
-### 浮动窗口
-半透明、置顶、可拖动的小窗设计，完美叠加在任意聊天软件之上，不干扰你的正常使用。
-
----
-
-## 移动端
-
-**Android 应用** - 把你的手机变成 GalGame 界面
-
-- 实时摄像头画面 + GalGame 风格 UI
-- 语音识别，自动生成字幕
-- 完整的 GalGame 交互体验（好感度条、对话框、选项按钮）
-- SAVE / Q.SAVE 截图保存功能
-- 可调节的"CG 切换"画面效果
-
-**特色功能：**
-- 设置触发弹窗的关键词
-- 好感度随时间变化，语音互动会提升
-- 支持离线运行，无需联网
-
-[查看移动端详细文档](./mobile/README.md)
-
-### 下载
-
-- **GitHub Release**: [点击下载](https://github.com/JStone2934/LiveGalGame/tags)
-- **夸克网盘**: https://pan.quark.cn/s/1000136902b5
-- **百度网盘**: https://pan.baidu.com/s/1Bpt2DZNvjzT6BpKr8RyG-A?pwd=94g6
-[![Get it on F-Droid](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)](https://f-droid.org/packages/com.jstone.livegalgame/)
-
----
-
-## 桌面端
-
-**Windows / macOS 应用** - 专为语音聊天场景设计的智能助手
-
-### macOS 安装提示（未签名）
-
-- 当前开源版本未做 Apple 官方签名/公证，直接双击 DMG 可能提示“应用已损坏/来自未被认可的开发者”。
-- 推荐做法：在 Finder 中控制键+点按 DMG 内的 `LiveGalGame.app`，选择“打开”，在弹窗中再次“打开”，系统将对本次豁免。（参考 [macguide.leavelet.io](https://macguide.leavelet.io/Bike/appnotopen.html)）
-- 如仍被拦截，可在终端移除隔离属性：`sudo xattr -r -d com.apple.quarantine "/Applications/LiveGalGame.app"`（请替换为实际路径）。
-- 临时放宽 Gatekeeper（风险较高，装完建议恢复）：`sudo spctl --master-disable`，安装后 `sudo spctl --master-enable`。
-
-### 使用流程
-
-1. **创建对话对象**
-   - 填写对方的昵称、关系和备注
-   - 这些信息会帮助 AI 更好地理解场景
-
-2. **启动对话**
-   - 点击"开始对话"，浮动小窗出现
-   - 半透明设计，完美贴合你的聊天窗口
-
-3. **实时对话**
-   - 开始聊天，双语字幕实时显示
-   - 再也不用担心听漏或忘记
-
-4. **获取 AI 建议**
-   - 在关键时刻，AI 自动给出回复建议
-   - 每个选项都有情感分析和效果预测
-
-5. **看到效果**
-   - 选择回复后，好感度动画反馈
-   - 把"聊得好"变成可量化的成就感
-
-[查看桌面端详细文档](./desktop/README.md)
-
-### 桌面版界面
-以下为桌面端应用界面截图：
-
-1. **主界面**：可以在聊天过程中看到实时字幕及对话选项，帮助你保持 GalGame 节奏。
-<img width="100%" alt="桌面端界面 1" src="./desktop/docs/images/iwEdAqNwbmcDAQTRC0wF0QZmBrBJU3uUrci3xwkKJkQ2yLEBB9MAAAABVTtvOAgACaJpbQoAC9IAGo-x.png" />
-2. **配置LLM**：在这里选择你自己的模型，作为你的助手。
-<img width="100%" alt="桌面端界面 2" src="./desktop/docs/images/iwEcAqNwbmcDAQTRCWAF0QZABrCeJHHnYHS-2AkKJkQ2yLECB9MAAAABVTtvOAgACaJpbQoAC9IABCUe.png" />
-3. **轨迹记录**：记录对话历史与好感度变化，使你随时回顾并优化聊天策略。
-<img width="100%" alt="桌面端界面 3" src="./desktop/docs/images/07BF93BD-4390-4F52-A3DA-1BEBF18FB8F0.png" />
-
----
-
-## 🎬 演示视频
-
-B站视频：[【修复了GalGame玩家和女生聊天没有字幕的Bug】](https://www.bilibili.com/video/BV15Q1jBQEzq/?share_source=copy_web&vd_source=181e7acfd50ad37dbfacd601ca302c13)
-
-<img width="100%" alt="demo" src="https://github.com/user-attachments/assets/65dd6c6f-bf47-4bc0-9695-034c7faa290d" />
-
-
----
-
-## 🤝 加入我们
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JStone2934/LiveGalGame)
-可以先通过 deepwiki 看一下项目进展！
-**QQ 群：1074602400**
-
-欢迎自由开发，有活你就直接往里加！
-
-提交 Issue 和 Pull Request 都非常欢迎。
-
----
-
-## 📄 License
-
-本项目采用开源协议，详见 [LICENSE](./mobile/LICENSE)。
-
+完整的配置、使用、备份、旧数据库迁移和故障处理见 [部署与使用教程](docs/web-deployment.md)。开发说明见 [desktop/README.md](desktop/README.md)。

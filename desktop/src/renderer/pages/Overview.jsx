@@ -22,7 +22,7 @@ function Overview() {
       const isElectron = window.electronAPI !== undefined;
 
       if (!isElectron) {
-        console.warn('⚠️ 当前不在 Electron 环境中，无法加载数据。请在 Electron 应用中打开此页面。');
+        console.warn('⚠️ 服务接口尚未初始化，请刷新页面。');
         setLoading(false);
         return;
       }
@@ -59,7 +59,7 @@ function Overview() {
     }
   };
 
-  const handleShowHUD = () => navigate('/conversations');
+  const handleOpenConversation = () => navigate('/conversations');
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -184,14 +184,14 @@ function Overview() {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={handleShowHUD}
-                className="btn-hud flex min-w-[84px] items-center justify-center gap-2 overflow-hidden rounded-full h-11 px-5 border border-primary text-primary text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary-subtle-light/50 dark:hover:bg-primary-subtle-dark/50 transition-colors"
+                onClick={handleOpenConversation}
+                className="btn-conversation flex min-w-[84px] items-center justify-center gap-2 overflow-hidden rounded-full h-11 px-5 border border-primary text-primary text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary-subtle-light/50 dark:hover:bg-primary-subtle-dark/50 transition-colors"
               >
                 <span className="material-symbols-outlined text-base">support_agent</span>
                 <span className="truncate">实时助手</span>
               </button>
               <Link
-                to="/conversations"
+                to="/conversations?new=1"
                 className="btn-new-conversation flex min-w-[84px] items-center justify-center gap-2 overflow-hidden rounded-full h-11 px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity"
               >
                 <span className="material-symbols-outlined text-base">add</span>
