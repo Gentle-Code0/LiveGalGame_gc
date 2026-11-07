@@ -121,7 +121,7 @@
 
 ## 8. Git 与交付
 
-- 一个分支或提交通常对应一个逻辑任务。分支建议使用 `<type>/<short-description>`；有关联 issue 时可使用 `<type>/issue-<number>-<short-description>`，不虚构编号。
+- 一次提交通常对应一个逻辑任务。不得擅自创建新的分支。
 - 不提交秘密、缓存、临时文件及非项目要求的构建产物。项目明确版本管理的生成资产不在此限。
 - 最终提交标题使用 `<type>(<optional-scope>): <summary>`。类型通常为 `feat`、`fix`、`refactor`、`test`、`docs`、`build`、`ci`、`chore`、`perf` 或 `revert`；摘要具体、有意义，语言遵循项目约定。
 - 正文和 footer 按需提供；非显然动机、重要行为变化、兼容性影响和验证限制应在提交或 PR 中记录。仅真正完成 issue 时使用 `Closes:`，其他关联使用 `Refs:`；破坏性变更明确标记 `BREAKING CHANGE:`。
